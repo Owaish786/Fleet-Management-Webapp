@@ -5,6 +5,7 @@ const prisma = new PrismaClient()
 const DEMO_PASSWORD = 'password123'
 
 async function main() {
+  await prisma.vehicleLocationPing.deleteMany()
   await prisma.maintenanceRecord.deleteMany()
   await prisma.trip.deleteMany()
   await prisma.vehicle.deleteMany()
@@ -15,8 +16,8 @@ async function main() {
 
   await prisma.user.create({
     data: {
-      name: 'Demo Admin',
-      email: 'admin@haulsync.com',
+      name: 'Aarav Mehta',
+      email: 'admin@haulsync.in',
       password: hashedPassword,
     },
   })
@@ -24,25 +25,25 @@ async function main() {
   const drivers = await Promise.all([
     prisma.driver.create({
       data: {
-        name: 'Nadia Hassan',
+        name: 'Priya Sharma',
         licenseNumber: 'DL-482190',
-        phone: '+20 100 345 9981',
+        phone: '+91 98765 43210',
         status: 'AVAILABLE',
       },
     }),
     prisma.driver.create({
       data: {
-        name: 'Omar Khaled',
+        name: 'Raj Malhotra',
         licenseNumber: 'DL-593017',
-        phone: '+20 100 938 4417',
+        phone: '+91 99887 76655',
         status: 'ON_ROUTE',
       },
     }),
     prisma.driver.create({
       data: {
-        name: 'Lina Salim',
+        name: 'Neha Reddy',
         licenseNumber: 'DL-601822',
-        phone: '+20 100 127 7734',
+        phone: '+91 91234 56780',
         status: 'OFF_DUTY',
       },
     }),
@@ -51,7 +52,7 @@ async function main() {
   const vehicles = await Promise.all([
     prisma.vehicle.create({
       data: {
-        plateNumber: 'CAI-2451',
+        plateNumber: 'DL01AB2451',
         make: 'Mercedes-Benz',
         model: 'Actros',
         year: 2023,
@@ -62,7 +63,7 @@ async function main() {
     }),
     prisma.vehicle.create({
       data: {
-        plateNumber: 'ALX-1187',
+        plateNumber: 'MH02TR1187',
         make: 'Volvo',
         model: 'FH16',
         year: 2022,
@@ -73,7 +74,7 @@ async function main() {
     }),
     prisma.vehicle.create({
       data: {
-        plateNumber: 'GIZ-7740',
+        plateNumber: 'KA05GX7740',
         make: 'Scania',
         model: 'R500',
         year: 2024,
@@ -86,26 +87,26 @@ async function main() {
   await Promise.all([
     prisma.trip.create({
       data: {
-        routeName: 'Delta Supply Run',
-        origin: 'Cairo',
-        destination: 'Mansoura',
+        routeName: 'Delhi Jaipur Corridor',
+        origin: 'Delhi',
+        destination: 'Jaipur',
         departureAt: new Date(),
-        distanceKm: 126,
+        distanceKm: 281,
         status: 'IN_PROGRESS',
         fuelUsedLiters: 34.5,
         vehicleId: vehicles[0].id,
         driverId: drivers[1].id,
-        notes: 'Priority medical supplies.',
+        notes: 'Priority pharma supplies for NCR and Rajasthan depots.',
       },
     }),
     prisma.trip.create({
       data: {
-        routeName: 'Coastal Delivery',
-        origin: 'Alexandria',
-        destination: 'Port Said',
+        routeName: 'Mumbai Pune Shuttle',
+        origin: 'Mumbai',
+        destination: 'Pune',
         departureAt: new Date(Date.now() - 1000 * 60 * 60 * 6),
         arrivalAt: new Date(Date.now() - 1000 * 60 * 60 * 2),
-        distanceKm: 212,
+        distanceKm: 149,
         status: 'COMPLETED',
         fuelUsedLiters: 51.2,
         vehicleId: vehicles[2].id,
@@ -131,6 +132,48 @@ async function main() {
         status: 'SCHEDULED',
         scheduledFor: new Date(Date.now() + 1000 * 60 * 60 * 24 * 3),
         vehicleId: vehicles[0].id,
+      },
+    }),
+  ])
+
+  await Promise.all([
+    prisma.vehicleLocationPing.create({
+      data: {
+        vehicleId: vehicles[0].id,
+        driverId: drivers[1].id,
+        tripId: (await prisma.trip.findFirst({ where: { vehicleId: vehicles[0].id } }))?.id,
+        latitude: 28.1836,
+        longitude: 76.6235,
+        speedKph: 58,
+        headingDeg: 102,
+        accuracyM: 12,
+        batteryLevel: 79,
+        recordedAt: new Date(),
+      },
+    }),
+    prisma.vehicleLocationPing.create({
+      data: {
+        vehicleId: vehicles[1].id,
+        driverId: drivers[0].id,
+        latitude: 19.076,
+        longitude: 72.8777,
+        speedKph: 0,
+        headingDeg: 0,
+        accuracyM: 8,
+        batteryLevel: 54,
+        recordedAt: new Date(Date.now() - 1000 * 60 * 18),
+      },
+    }),
+    prisma.vehicleLocationPing.create({
+      data: {
+        vehicleId: vehicles[2].id,
+        latitude: 12.9716,
+        longitude: 77.5946,
+        speedKph: 16,
+        headingDeg: 245,
+        accuracyM: 20,
+        batteryLevel: 61,
+        recordedAt: new Date(Date.now() - 1000 * 60 * 6),
       },
     }),
   ])

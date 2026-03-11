@@ -64,7 +64,7 @@ export function ForgotPasswordPage() {
             <Truck size={26} className="text-white" />
           </div>
           <h1 className="font-display text-3xl font-extrabold tracking-tight text-slate-900">
-            HaulSync
+            HaulSync India
           </h1>
           <p className="mt-1 text-sm text-slate-500">Password recovery</p>
         </div>
@@ -95,7 +95,7 @@ export function ForgotPasswordPage() {
                 <input
                   className={`${inputCls} pl-10`}
                   type="email"
-                  placeholder="admin@haulsync.com"
+                  placeholder="admin@haulsync.in"
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   required

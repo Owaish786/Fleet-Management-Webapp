@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { Activity, CarFront, ChevronDown, ClipboardList, LogOut, Menu, Route, ShieldCheck, Truck, Users, X } from 'lucide-react'
+import { Activity, CarFront, ChevronDown, ClipboardList, LogOut, MapPinned, Menu, Route, ShieldCheck, Truck, Users, X } from 'lucide-react'
+import { formatDate } from '../lib/formatters'
 import { useAuth } from '../context/auth-context'
 
 const navigation = [
   { to: '/dashboard', label: 'Dashboard', icon: Activity },
+  { to: '/tracking', label: 'Tracking', icon: MapPinned },
   { to: '/vehicles', label: 'Vehicles', icon: CarFront },
   { to: '/drivers', label: 'Drivers', icon: Users },
   { to: '/trips', label: 'Trips', icon: Route },
@@ -13,6 +15,7 @@ const navigation = [
 
 const pageTitles: Record<string, string> = {
   '/dashboard': 'Dashboard',
+  '/tracking': 'Tracking',
   '/vehicles': 'Vehicles',
   '/drivers': 'Drivers',
   '/trips': 'Trips',
@@ -31,11 +34,7 @@ export function Layout() {
   const displayName = user?.name?.trim() || 'User'
   const displayEmail = user?.email || 'No email available'
   const memberSince = user?.createdAt
-    ? new Date(user.createdAt).toLocaleDateString(undefined, {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-      })
+    ? formatDate(user.createdAt)
     : null
 
   const initials = displayName
@@ -84,7 +83,7 @@ export function Layout() {
               <Truck size={18} className="text-white" />
             </div>
             <span className="font-display text-lg font-extrabold tracking-tight text-slate-900">
-              HaulSync
+              HaulSync India
             </span>
           </div>
 

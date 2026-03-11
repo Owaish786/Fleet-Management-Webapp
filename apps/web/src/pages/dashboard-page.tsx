@@ -15,6 +15,7 @@ import {
 
 import { StatCard } from '../components/stat-card'
 import { fleetApi } from '../lib/api'
+import { formatDateTime } from '../lib/formatters'
 import { statusBadgeClass } from '../lib/status-styles'
 import type { DashboardSummary } from '../types/fleet'
 
@@ -57,30 +58,30 @@ const fallbackSummary: DashboardSummary = {
   recentTrips: [
     {
       id: 'preview-1',
-      routeName: 'Cairo to Suez',
+      routeName: 'Delhi to Jaipur',
       status: 'IN_PROGRESS',
-      distanceKm: 143,
+      distanceKm: 281,
       departureAt: new Date().toISOString(),
-      driverName: 'Nadia Hassan',
-      plateNumber: 'CAI-2451',
+      driverName: 'Raj Malhotra',
+      plateNumber: 'DL01AB2451',
     },
     {
       id: 'preview-2',
-      routeName: 'Alex to Port Said',
+      routeName: 'Mumbai to Pune',
       status: 'COMPLETED',
-      distanceKm: 212,
+      distanceKm: 149,
       departureAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-      driverName: 'Omar Khaled',
-      plateNumber: 'ALX-1187',
+      driverName: 'Priya Sharma',
+      plateNumber: 'MH02TR1187',
     },
     {
       id: 'preview-3',
-      routeName: 'Giza to Fayoum',
+      routeName: 'Bengaluru to Mysuru',
       status: 'SCHEDULED',
-      distanceKm: 98,
+      distanceKm: 145,
       departureAt: new Date(Date.now() + 1000 * 60 * 45).toISOString(),
-      driverName: 'Lina Salim',
-      plateNumber: 'GIZ-7740',
+      driverName: 'Neha Reddy',
+      plateNumber: 'KA05GX7740',
     },
   ],
 }
@@ -433,7 +434,7 @@ export function DashboardPage() {
                   <td className="px-3 py-3 font-medium text-slate-800">
                     <div>
                       <p className="font-semibold text-slate-900">{trip.routeName}</p>
-                      <p className="text-xs text-slate-400">Departure {new Date(trip.departureAt).toLocaleString()}</p>
+                      <p className="text-xs text-slate-400">Departure {formatDateTime(trip.departureAt)}</p>
                     </div>
                   </td>
                   <td className="px-3 py-3 text-slate-600">{trip.driverName}</td>

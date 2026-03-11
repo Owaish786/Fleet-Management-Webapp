@@ -77,9 +77,9 @@ export function SignupPage() {
             <Truck size={26} className="text-white" />
           </div>
           <h1 className="font-display text-3xl font-extrabold tracking-tight text-slate-900">
-            HaulSync
+            HaulSync India
           </h1>
-          <p className="mt-1 text-sm text-slate-500">Fleet Operations Platform</p>
+          <p className="mt-1 text-sm text-slate-500">India Fleet Operations Platform</p>
         </div>
 
         <div className="rounded-[2rem] border border-white/80 bg-white/90 p-8 shadow-xl shadow-slate-900/6 backdrop-blur">
@@ -100,7 +100,7 @@ export function SignupPage() {
               <input
                 className={inputCls}
                 type="text"
-                placeholder="John Doe"
+                placeholder="Aarav Mehta"
                 value={form.fullName}
                 onChange={(e) => setForm({ ...form, fullName: e.target.value })}
                 required
@@ -113,7 +113,7 @@ export function SignupPage() {
               <input
                 className={inputCls}
                 type="email"
-                placeholder="operator@haulsync.com"
+                placeholder="operator@haulsync.in"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 required
@@ -244,7 +244,7 @@ export function SignupPage() {
 
         {/* Footer */}
         <p className="mt-8 text-center text-xs text-slate-400">
-          &copy; {new Date().getFullYear()} HaulSync Operations &middot; Fleet Management Platform
+          &copy; {new Date().getFullYear()} HaulSync India &middot; Fleet Management Platform
         </p>
       </div>
       </div>

@@ -84,6 +84,34 @@ export interface DashboardSummary {
   }>
 }
 
+export interface LiveTrackingPoint {
+  id: string
+  latitude: number
+  longitude: number
+  speedKph: number | null
+  headingDeg: number | null
+  accuracyM: number | null
+  batteryLevel: number | null
+  recordedAt: string
+  ageSeconds: number
+  vehicle: {
+    id: string
+    plateNumber: string
+    make: string
+    model: string
+    status: VehicleStatus
+  }
+  driver: {
+    id: string
+    name: string
+  } | null
+  trip: {
+    id: string
+    routeName: string
+    status: TripStatus
+  } | null
+}
+
 export interface VehicleInput {
   plateNumber: string
   make: string
@@ -92,6 +120,11 @@ export interface VehicleInput {
   mileage: number
   status: VehicleStatus
   assignedDriverId?: string | null
+}
+
+export interface VehicleAssignmentInput {
+  assignedDriverId: string | null
+  allowReassignment?: boolean
 }
 
 export interface DriverInput {
@@ -113,6 +146,13 @@ export interface TripInput {
   notes?: string | null
   vehicleId: string
   driverId: string
+}
+
+export interface TripCompletionInput {
+  arrivalAt?: string
+  fuelUsedLiters?: number | null
+  notes?: string | null
+  releaseAssignment?: boolean
 }
 
 export interface MaintenanceInput {

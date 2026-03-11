@@ -11,6 +11,7 @@ const ForgotPasswordPage = lazy(() => import('./pages/forgot-password-page').the
 const LoginPage = lazy(() => import('./pages/login-page').then((module) => ({ default: module.LoginPage })))
 const MaintenancePage = lazy(() => import('./pages/maintenance-page').then((module) => ({ default: module.MaintenancePage })))
 const SignupPage = lazy(() => import('./pages/signup-page').then((module) => ({ default: module.SignupPage })))
+const TrackingPage = lazy(() => import('./pages/tracking-page').then((module) => ({ default: module.TrackingPage })))
 const TripsPage = lazy(() => import('./pages/trips-page').then((module) => ({ default: module.TripsPage })))
 const VehiclesPage = lazy(() => import('./pages/vehicles-page').then((module) => ({ default: module.VehiclesPage })))
 
@@ -40,6 +41,7 @@ function App() {
           }
         >
           <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="tracking" element={<TrackingPage />} />
           <Route path="vehicles" element={<VehiclesPage />} />
           <Route path="drivers" element={<DriversPage />} />
           <Route path="trips" element={<TripsPage />} />

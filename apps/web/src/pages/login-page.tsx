@@ -32,7 +32,7 @@ export function LoginPage() {
     'w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm text-slate-800 outline-none placeholder-slate-400 transition-colors focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20'
 
   function fillDemoAccount() {
-    setEmail('admin@haulsync.com')
+    setEmail('admin@haulsync.in')
     setPassword('password123')
   }
 
@@ -75,9 +75,9 @@ export function LoginPage() {
             <Truck size={26} className="text-white" />
           </div>
           <h1 className="font-display text-3xl font-extrabold tracking-tight text-slate-900">
-            HaulSync
+            HaulSync India
           </h1>
-          <p className="mt-1 text-sm text-slate-500">Fleet Operations Platform</p>
+          <p className="mt-1 text-sm text-slate-500">India Fleet Operations Platform</p>
         </div>
 
         <div className="rounded-[2rem] border border-white/80 bg-white/90 p-8 shadow-xl shadow-slate-900/6 backdrop-blur">
@@ -90,7 +90,7 @@ export function LoginPage() {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="font-semibold">Demo credentials</p>
-                <p className="mt-1 text-brand-900/80">Email: admin@haulsync.com</p>
+                <p className="mt-1 text-brand-900/80">Email: admin@haulsync.in</p>
                 <p className="text-brand-900/80">Password: password123</p>
               </div>
               <button
@@ -116,7 +116,7 @@ export function LoginPage() {
               <input
                 className={inputCls}
                 type="email"
-                placeholder="operator@haulsync.com"
+                placeholder="operator@haulsync.in"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -196,7 +196,7 @@ export function LoginPage() {
 
         {/* Footer */}
         <p className="mt-8 text-center text-xs text-slate-400">
-          &copy; {new Date().getFullYear()} HaulSync Operations &middot; Fleet Management Platform
+          &copy; {new Date().getFullYear()} HaulSync India &middot; Fleet Management Platform
         </p>
       </div>
       </div>

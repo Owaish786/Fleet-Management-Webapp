@@ -2,11 +2,14 @@ import type {
   DashboardSummary,
   Driver,
   DriverInput,
+  LiveTrackingPoint,
   MaintenanceInput,
   MaintenanceRecord,
   Trip,
+  TripCompletionInput,
   TripInput,
   Vehicle,
+  VehicleAssignmentInput,
   VehicleInput,
 } from '../types/fleet'
 
@@ -39,10 +42,16 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export const fleetApi = {
   getDashboard: () => request<DashboardSummary>('/dashboard'),
+  getLatestTracking: () => request<LiveTrackingPoint[]>('/tracking/latest'),
   getVehicles: () => request<Vehicle[]>('/vehicles'),
   createVehicle: (payload: VehicleInput) =>
     request<Vehicle>('/vehicles', {
       method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  updateVehicleAssignment: (vehicleId: string, payload: VehicleAssignmentInput) =>
+    request<Vehicle>(`/vehicles/${vehicleId}/assignment`, {
+      method: 'PATCH',
       body: JSON.stringify(payload),
     }),
   getDrivers: () => request<Driver[]>('/drivers'),
@@ -55,6 +64,11 @@ export const fleetApi = {
   createTrip: (payload: TripInput) =>
     request<Trip>('/trips', {
       method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  completeTrip: (tripId: string, payload: TripCompletionInput) =>
+    request<Trip>(`/trips/${tripId}/complete`, {
+      method: 'PATCH',
       body: JSON.stringify(payload),
     }),
   getMaintenance: () => request<MaintenanceRecord[]>('/maintenance'),
