@@ -1,0 +1,22 @@
+{
+  "name": "fleet-management-webapp",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n web,api -c cyan,green \"npm run dev --workspace @fleet/web\" \"npm run dev --workspace @fleet/api\"",
+    "build": "npm run build --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "db:generate": "npm run db:generate --workspace @fleet/api",
+    "db:migrate": "npm run db:migrate --workspace @fleet/api",
+    "db:seed": "npm run db:seed --workspace @fleet/api"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

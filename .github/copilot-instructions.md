@@ -1,0 +1,17 @@
+- [x] Verify that the copilot-instructions.md file in the .github directory is created.
+- [x] Clarify Project Requirements
+- [x] Scaffold the Project
+- [x] Customize the Project
+- [x] Install Required Extensions
+- [x] Compile the Project
+- [x] Create and Run Task
+- [ ] Launch the Project
+- [x] Ensure Documentation is Complete
+
+- React UI lives in apps/web.
+- Node.js + Express API lives in apps/api.
+- Prisma schema and seed live in prisma.
+- PostgreSQL is defined in docker-compose.yml.
+- Use npm install, npm run db:generate, npm run db:migrate, npm run db:seed, and npm run dev.
+- No VS Code extensions were required by project setup.
+- Launch remains unchecked because debug launch was not explicitly requested.
