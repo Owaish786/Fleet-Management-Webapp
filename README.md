@@ -26,7 +26,8 @@ A production-minded full-stack fleet management starter built from scratch with 
 - Dashboard summary with charts for fleet utilization and recent route activity
 - Vehicle, driver, trip, and maintenance views
 - Create flows for vehicles, drivers, trips, and maintenance records
-- Prisma schema and seed data for the core fleet domain
+- Prisma schema and starter seed data (drivers only)
+- Live tracking foundation is present in the API/web stack; full real-world live tracking will be available after the planned mobile app client is implemented
 - Clean monorepo scripts for development, build, and database commands
 
 ## Getting started
@@ -72,4 +73,4 @@ The frontend runs on `http://localhost:5173` and the API runs on `http://localho
 - `npm run lint` runs workspace linters
 - `npm run db:generate` generates the Prisma client
 - `npm run db:migrate` creates or applies database migrations
-- `npm run db:seed` loads demo fleet data
+- `npm run db:seed` resets data and loads seeded drivers only
