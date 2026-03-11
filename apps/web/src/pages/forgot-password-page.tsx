@@ -1,6 +1,6 @@
 import { type FormEvent, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, Mail, ShieldCheck, Truck } from 'lucide-react'
+import { ArrowLeft, Mail, ShieldCheck, Sparkles, Truck } from 'lucide-react'
 
 import { authApi } from '../lib/api'
 
@@ -45,6 +45,19 @@ export function ForgotPasswordPage() {
             <p className="mt-4 max-w-lg text-base leading-7 text-slate-600">
               The current flow confirms reset requests inside the product and is ready to be rewired later to email delivery.
             </p>
+
+            <div className="mt-8 grid gap-3 sm:grid-cols-2">
+              <div className="rounded-2xl border border-white/80 bg-white/80 px-4 py-4 shadow-sm shadow-slate-900/5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Current mode</p>
+                <p className="mt-2 text-lg font-bold text-slate-900">In-app confirmation</p>
+                <p className="mt-1 text-sm text-slate-500">Useful for demo, testing, and operator support flows.</p>
+              </div>
+              <div className="rounded-2xl border border-white/80 bg-white/80 px-4 py-4 shadow-sm shadow-slate-900/5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Future path</p>
+                <p className="mt-2 text-lg font-bold text-slate-900">Email or SMS</p>
+                <p className="mt-1 text-sm text-slate-500">This surface is already shaped for a real delivery channel later.</p>
+              </div>
+            </div>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-white px-5 py-5">
@@ -70,6 +83,10 @@ export function ForgotPasswordPage() {
         </div>
 
         <div className="rounded-[2rem] border border-white/80 bg-white/90 p-8 shadow-xl shadow-slate-900/6 backdrop-blur">
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-cyan-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-700 ring-1 ring-cyan-100">
+            <Sparkles size={12} />
+            Recovery flow
+          </div>
           <div className="mb-6 text-center">
             <h2 className="font-display text-xl font-bold text-slate-900">Reset your password</h2>
             <p className="mt-1 text-sm text-slate-500">Enter your email to continue</p>
@@ -111,6 +128,10 @@ export function ForgotPasswordPage() {
             >
               {isSubmitting ? 'Sending...' : 'Send reset instructions'}
             </button>
+
+            <div className="rounded-xl bg-slate-50 px-4 py-3 text-xs font-medium text-slate-500">
+              Use the operator email linked to the account you want to recover.
+            </div>
           </form>
 
           <div className="mt-6 text-center">

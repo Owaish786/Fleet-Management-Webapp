@@ -152,6 +152,15 @@ export function DashboardPage() {
     ? Math.round(totalDistance / analyticsTrips.length)
     : 0
   const peakTrip = [...analyticsTrips].sort((a, b) => b.distanceKm - a.distanceKm)[0]
+  const completionRate = analyticsTrips.length
+    ? Math.round((analyticsTrips.filter((trip) => trip.status === 'COMPLETED').length / analyticsTrips.length) * 100)
+    : 0
+  const inProgressRate = analyticsTrips.length
+    ? Math.round((analyticsTrips.filter((trip) => trip.status === 'IN_PROGRESS').length / analyticsTrips.length) * 100)
+    : 0
+  const scheduledRate = analyticsTrips.length
+    ? Math.round((analyticsTrips.filter((trip) => trip.status === 'SCHEDULED').length / analyticsTrips.length) * 100)
+    : 0
 
   return (
     <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
@@ -232,6 +241,80 @@ export function DashboardPage() {
         <StatCard label="Drivers" value={displaySummary.totals.drivers} detail="Operators in the roster" meta="people" accentClass="from-cyan-500/20 via-cyan-100/60 to-transparent" />
         <StatCard label="Trips in motion" value={displaySummary.totals.activeTrips} detail="Currently in progress" meta="live" accentClass="from-amber-500/20 via-amber-100/60 to-transparent" />
       </div>
+
+      <section className="animate-fade-up col-span-full overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="mb-0.5 text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Ops signals</p>
+            <h3 className="font-display text-xl font-bold text-slate-900">What deserves attention right now</h3>
+            <p className="mt-1 text-sm text-slate-500">A fast operational readout based on the current route window and fleet state.</p>
+          </div>
+          <div className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+            {routeRange}
+          </div>
+        </div>
+
+        <div className="mt-6 grid gap-4 lg:grid-cols-[1.1fr_0.9fr_1fr]">
+          <div className="rounded-[1.5rem] border border-brand-100 bg-gradient-to-br from-brand-50 via-white to-cyan-50 p-5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-600">Priority lane</p>
+            <h4 className="mt-2 text-lg font-bold text-slate-900">{peakTrip?.routeName ?? 'No route activity yet'}</h4>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              {peakTrip
+                ? `${peakTrip.driverName} is carrying the heaviest route in the current window on ${peakTrip.plateNumber}.`
+                : 'Route volume will surface here as trips are created.'}
+            </p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <div className="rounded-2xl border border-white/80 bg-white/85 px-4 py-3 shadow-sm shadow-slate-900/5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Distance</p>
+                <p className="mt-1 text-lg font-bold text-slate-900">{peakTrip?.distanceKm ?? 0} km</p>
+              </div>
+              <div className="rounded-2xl border border-white/80 bg-white/85 px-4 py-3 shadow-sm shadow-slate-900/5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Status</p>
+                <p className="mt-1 text-lg font-bold text-slate-900">{peakTrip?.status ?? 'Idle'}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50/85 p-5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Route mix</p>
+            <div className="mt-4 space-y-3">
+              {[
+                { label: 'Completed', value: completionRate, color: 'bg-emerald-500' },
+                { label: 'In progress', value: inProgressRate, color: 'bg-brand-500' },
+                { label: 'Scheduled', value: scheduledRate, color: 'bg-amber-500' },
+              ].map((item) => (
+                <div key={item.label}>
+                  <div className="mb-1 flex items-center justify-between gap-3 text-sm text-slate-600">
+                    <span className="font-medium text-slate-700">{item.label}</span>
+                    <span className="font-semibold text-slate-900">{item.value}%</span>
+                  </div>
+                  <div className="h-2 overflow-hidden rounded-full bg-white ring-1 ring-slate-200">
+                    <div className={`h-full rounded-full ${item.color}`} style={{ width: `${item.value}%` }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Daily posture</p>
+            <div className="mt-4 space-y-3">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                <p className="text-sm font-semibold text-slate-900">Asset readiness</p>
+                <p className="mt-1 text-sm text-slate-500">{displaySummary.totals.activeVehicles} vehicles are dispatch-ready out of {displaySummary.totals.vehicles}.</p>
+              </div>
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                <p className="text-sm font-semibold text-slate-900">Workshop pressure</p>
+                <p className="mt-1 text-sm text-slate-500">{displaySummary.totals.maintenanceDue} assets need maintenance attention.</p>
+              </div>
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                <p className="text-sm font-semibold text-slate-900">Dispatch pulse</p>
+                <p className="mt-1 text-sm text-slate-500">{displaySummary.totals.activeTrips} trips are active in the selected time view.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* ── Pie chart ── */}
       <section className="animate-fade-up rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">

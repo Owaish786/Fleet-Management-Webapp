@@ -1,5 +1,5 @@
 import { type FormEvent, useEffect, useMemo, useState } from 'react'
-import { BadgeCheck, IdCard, Phone, UserPlus, Users } from 'lucide-react'
+import { BadgeCheck, IdCard, Phone, Search, SlidersHorizontal, UserPlus, Users } from 'lucide-react'
 
 import { fleetApi } from '../lib/api'
 import { formatDate } from '../lib/formatters'
@@ -21,6 +21,8 @@ const inputCls = 'w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2
 export function DriversPage() {
   const [drivers, setDrivers] = useState<Driver[]>([])
   const [form, setForm] = useState<DriverInput>(initialDriver)
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState<'ALL' | DriverStatus>('ALL')
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -46,6 +48,27 @@ export function DriversPage() {
     () => drivers.filter((driver) => driver.assignedVehicles.length > 0).length,
     [drivers],
   )
+
+  const filteredDrivers = useMemo(() => {
+    const query = search.trim().toLowerCase()
+
+    return drivers.filter((driver) => {
+      if (statusFilter !== 'ALL' && driver.status !== statusFilter) {
+        return false
+      }
+
+      if (!query) {
+        return true
+      }
+
+      return [
+        driver.name,
+        driver.licenseNumber,
+        driver.phone,
+        driver.assignedVehicles.map((vehicle) => vehicle.plateNumber).join(' '),
+      ].some((value) => value.toLowerCase().includes(query))
+    })
+  }, [drivers, search, statusFilter])
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -116,7 +139,7 @@ export function DriversPage() {
             <p className="mb-0.5 text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Crew roster</p>
             <h3 className="font-display text-xl font-bold text-slate-900">Drivers</h3>
           </div>
-          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{drivers.length} records</span>
+          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{filteredDrivers.length} of {drivers.length}</span>
         </div>
 
         {error && (
@@ -124,6 +147,31 @@ export function DriversPage() {
             {error}
           </div>
         )}
+
+        <div className="mt-5 grid gap-3 rounded-2xl border border-slate-200 bg-slate-50/85 p-3 md:grid-cols-[1fr_180px]">
+          <label className="relative block">
+            <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-700 outline-none transition-colors focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search driver, licence, phone, or vehicle"
+            />
+          </label>
+          <label className="relative block">
+            <SlidersHorizontal size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <select
+              className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-700 outline-none transition-colors focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value as 'ALL' | DriverStatus)}
+            >
+              <option value="ALL">All statuses</option>
+              {driverStatuses.map((status) => (
+                <option key={status} value={status}>{status}</option>
+              ))}
+            </select>
+          </label>
+        </div>
 
         <div className="mt-5 overflow-x-auto">
           <table className="w-full border-collapse text-sm">
@@ -137,7 +185,7 @@ export function DriversPage() {
               </tr>
             </thead>
             <tbody>
-              {drivers.map((driver) => (
+              {filteredDrivers.map((driver) => (
                 <tr key={driver.id} className="border-b border-slate-100 transition-colors hover:bg-slate-50/80">
                   <td className="px-3 py-3 font-medium text-slate-800">
                     <div>
@@ -155,9 +203,9 @@ export function DriversPage() {
                   <td className="px-3 py-3 text-slate-600">{driver.assignedVehicles.map((v) => v.plateNumber).join(', ') || 'None'}</td>
                 </tr>
               ))}
-              {drivers.length === 0 && (
+              {filteredDrivers.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-3 py-8 text-center text-sm text-slate-500">No drivers registered yet.</td>
+                  <td colSpan={5} className="px-3 py-8 text-center text-sm text-slate-500">No drivers match the current search or filter.</td>
                 </tr>
               )}
             </tbody>

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Battery, Gauge, MapPinned, Radar, RefreshCcw, Smartphone } from 'lucide-react'
+import { Battery, Gauge, MapPinned, Radar, RefreshCcw, Search, Smartphone } from 'lucide-react'
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet'
 import { io } from 'socket.io-client'
 import L from 'leaflet'
@@ -22,6 +22,8 @@ const vehicleIcon = new L.DivIcon({
 
 export function TrackingPage() {
   const [points, setPoints] = useState<LiveTrackingPoint[]>([])
+  const [search, setSearch] = useState('')
+  const [movementFilter, setMovementFilter] = useState<'ALL' | 'MOVING' | 'STATIONARY'>('ALL')
   const [error, setError] = useState<string | null>(null)
   const [lastSync, setLastSync] = useState<Date | null>(null)
 
@@ -62,6 +64,33 @@ export function TrackingPage() {
   const avgSpeed = points.length
     ? Math.round(points.reduce((sum, point) => sum + (point.speedKph ?? 0), 0) / points.length)
     : 0
+  const filteredPoints = useMemo(() => {
+    const query = search.trim().toLowerCase()
+
+    return points.filter((point) => {
+      const isMoving = (point.speedKph ?? 0) > 5
+
+      if (movementFilter === 'MOVING' && !isMoving) {
+        return false
+      }
+
+      if (movementFilter === 'STATIONARY' && isMoving) {
+        return false
+      }
+
+      if (!query) {
+        return true
+      }
+
+      return [
+        point.vehicle.plateNumber,
+        point.vehicle.make,
+        point.vehicle.model,
+        point.driver?.name ?? '',
+        point.trip?.routeName ?? '',
+      ].some((value) => value.toLowerCase().includes(query))
+    })
+  }, [movementFilter, points, search])
 
   return (
     <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.35fr_0.65fr]">
@@ -131,7 +160,7 @@ export function TrackingPage() {
               attribution='&copy; OpenStreetMap contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-            {points.map((point) => (
+            {filteredPoints.map((point) => (
               <Marker key={point.id} position={[point.latitude, point.longitude]} icon={vehicleIcon}>
                 <Popup>
                   <div className="space-y-1.5 text-sm">
@@ -153,6 +182,7 @@ export function TrackingPage() {
           <div>
             <p className="mb-0.5 text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Vehicle feed</p>
             <h3 className="font-display text-xl font-bold text-slate-900">Latest device locations</h3>
+            <p className="mt-1 text-sm text-slate-500">Filter the live feed by motion state or search for a specific vehicle, route, or driver.</p>
           </div>
           <button
             type="button"
@@ -172,8 +202,36 @@ export function TrackingPage() {
           </button>
         </div>
 
+        <div className="mt-5 grid gap-3 rounded-2xl border border-slate-200 bg-slate-50/85 p-3 md:grid-cols-[1fr_auto]">
+          <label className="relative block">
+            <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-700 outline-none transition-colors focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search vehicle, driver, or trip"
+            />
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {(['ALL', 'MOVING', 'STATIONARY'] as const).map((filter) => (
+              <button
+                key={filter}
+                type="button"
+                onClick={() => setMovementFilter(filter)}
+                className={`rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] transition-colors ${
+                  movementFilter === filter
+                    ? 'bg-brand-600 text-white shadow-sm'
+                    : 'bg-white text-slate-500 ring-1 ring-slate-200 hover:text-slate-900'
+                }`}
+              >
+                {filter}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="mt-5 space-y-3">
-          {points.map((point) => (
+          {filteredPoints.map((point) => (
             <article key={point.id} className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
@@ -219,9 +277,9 @@ export function TrackingPage() {
             </article>
           ))}
 
-          {points.length === 0 && (
+          {filteredPoints.length === 0 && (
             <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-500">
-              No live vehicle locations yet.
+              No live vehicle locations match the current filter.
             </div>
           )}
         </div>

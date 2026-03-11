@@ -1,5 +1,5 @@
 import { type FormEvent, useEffect, useMemo, useState } from 'react'
-import { MapPinned, Route as RouteIcon, ShieldCheck, TimerReset, Truck, UserRound } from 'lucide-react'
+import { MapPinned, Route as RouteIcon, Search, ShieldCheck, SlidersHorizontal, TimerReset, Truck, UserRound } from 'lucide-react'
 
 import { fleetApi } from '../lib/api'
 import { statusBadgeClass } from '../lib/status-styles'
@@ -25,6 +25,8 @@ export function TripsPage() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
   const [drivers, setDrivers] = useState<Driver[]>([])
   const [form, setForm] = useState<TripInput>(initialTrip)
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState<'ALL' | TripStatus>('ALL')
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [completionBusyId, setCompletionBusyId] = useState<string | null>(null)
@@ -130,6 +132,28 @@ export function TripsPage() {
     })
   }, [activeDriverIds, drivers, form.status, selectedVehicle])
 
+  const filteredTrips = useMemo(() => {
+    const query = search.trim().toLowerCase()
+
+    return trips.filter((trip) => {
+      if (statusFilter !== 'ALL' && trip.status !== statusFilter) {
+        return false
+      }
+
+      if (!query) {
+        return true
+      }
+
+      return [
+        trip.routeName,
+        trip.origin,
+        trip.destination,
+        trip.driver.name,
+        trip.vehicle.plateNumber,
+      ].some((value) => value.toLowerCase().includes(query))
+    })
+  }, [search, statusFilter, trips])
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     try {
@@ -231,7 +255,7 @@ export function TripsPage() {
             <p className="mb-0.5 text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Dispatch board</p>
             <h3 className="font-display text-xl font-bold text-slate-900">Trips</h3>
           </div>
-          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{trips.length} routes</span>
+          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{filteredTrips.length} of {trips.length}</span>
         </div>
 
         {error && (
@@ -239,6 +263,31 @@ export function TripsPage() {
             {error}
           </div>
         )}
+
+        <div className="mt-5 grid gap-3 rounded-2xl border border-slate-200 bg-slate-50/85 p-3 md:grid-cols-[1fr_180px]">
+          <label className="relative block">
+            <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-700 outline-none transition-colors focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search route, city, driver, or vehicle"
+            />
+          </label>
+          <label className="relative block">
+            <SlidersHorizontal size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <select
+              className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-700 outline-none transition-colors focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value as 'ALL' | TripStatus)}
+            >
+              <option value="ALL">All statuses</option>
+              {tripStatuses.map((status) => (
+                <option key={status} value={status}>{status}</option>
+              ))}
+            </select>
+          </label>
+        </div>
 
         <div className="mt-5 overflow-x-auto">
           <table className="w-full border-collapse text-sm">
@@ -253,7 +302,7 @@ export function TripsPage() {
               </tr>
             </thead>
             <tbody>
-              {trips.map((trip) => (
+              {filteredTrips.map((trip) => (
                 <tr key={trip.id} className="border-b border-slate-100 transition-colors hover:bg-slate-50/80">
                   <td className="px-3 py-3 font-medium text-slate-800">
                     <div>
@@ -295,9 +344,9 @@ export function TripsPage() {
                   </td>
                 </tr>
               ))}
-              {trips.length === 0 && (
+              {filteredTrips.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-3 py-8 text-center text-sm text-slate-500">No trips scheduled yet.</td>
+                  <td colSpan={6} className="px-3 py-8 text-center text-sm text-slate-500">No trips match the current search or filter.</td>
                 </tr>
               )}
             </tbody>

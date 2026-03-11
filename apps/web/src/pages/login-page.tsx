@@ -1,6 +1,6 @@
 import { type FormEvent, useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
-import { ArrowRight, Eye, EyeOff, LogIn, ShieldCheck, Truck } from 'lucide-react'
+import { ArrowRight, Eye, EyeOff, LogIn, ShieldCheck, Sparkles, Truck } from 'lucide-react'
 import { useAuth } from '../context/auth-context'
 
 export function LoginPage() {
@@ -55,6 +55,24 @@ export function LoginPage() {
             <p className="mt-4 max-w-lg text-base leading-7 text-slate-600">
               Track fleet activity in real time, manage operations from a single dashboard, and keep your team aligned from route planning to workshop coverage.
             </p>
+
+            <div className="mt-8 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-2xl border border-white/80 bg-white/80 px-4 py-4 shadow-sm shadow-slate-900/5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Tracking</p>
+                <p className="mt-2 text-2xl font-bold tracking-tight text-slate-900">Live</p>
+                <p className="mt-1 text-sm text-slate-500">Map-first visibility for vehicles in motion.</p>
+              </div>
+              <div className="rounded-2xl border border-white/80 bg-white/80 px-4 py-4 shadow-sm shadow-slate-900/5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Dispatch</p>
+                <p className="mt-2 text-2xl font-bold tracking-tight text-slate-900">Unified</p>
+                <p className="mt-1 text-sm text-slate-500">Trips, drivers, and fleet readiness in one surface.</p>
+              </div>
+              <div className="rounded-2xl border border-white/80 bg-white/80 px-4 py-4 shadow-sm shadow-slate-900/5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Access</p>
+                <p className="mt-2 text-2xl font-bold tracking-tight text-slate-900">Secure</p>
+                <p className="mt-1 text-sm text-slate-500">Protected operator workspace with authenticated sessions.</p>
+              </div>
+            </div>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
@@ -81,9 +99,13 @@ export function LoginPage() {
         </div>
 
         <div className="rounded-[2rem] border border-white/80 bg-white/90 p-8 shadow-xl shadow-slate-900/6 backdrop-blur">
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-brand-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-700 ring-1 ring-brand-100">
+            <Sparkles size={12} />
+            Operator login
+          </div>
           <div className="mb-6 text-center">
             <h2 className="font-display text-xl font-bold text-slate-900">Welcome back</h2>
-            <p className="mt-1 text-sm text-slate-500">Sign in to your operations console</p>
+            <p className="mt-1 text-sm text-slate-500">Sign in to your operations console and resume fleet oversight.</p>
           </div>
 
           <div className="mb-5 rounded-2xl border border-brand-100 bg-gradient-to-br from-brand-50 to-cyan-50 px-4 py-4 text-sm text-brand-950">
@@ -176,6 +198,21 @@ export function LoginPage() {
             <div className="flex items-center justify-center gap-2 rounded-xl bg-slate-50 px-4 py-3 text-xs font-medium text-slate-500">
               <ShieldCheck size={14} className="text-emerald-600" />
               Protected workspace access for authenticated users only
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-center shadow-sm shadow-slate-900/5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Step 1</p>
+                <p className="mt-1 text-sm font-semibold text-slate-900">Authenticate</p>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-center shadow-sm shadow-slate-900/5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Step 2</p>
+                <p className="mt-1 text-sm font-semibold text-slate-900">Review fleet</p>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-center shadow-sm shadow-slate-900/5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Step 3</p>
+                <p className="mt-1 text-sm font-semibold text-slate-900">Dispatch actions</p>
+              </div>
             </div>
           </form>
 

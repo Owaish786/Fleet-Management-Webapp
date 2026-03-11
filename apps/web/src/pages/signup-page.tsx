@@ -1,6 +1,6 @@
 import { type FormEvent, useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
-import { Eye, EyeOff, ShieldCheck, Truck, UserPlus } from 'lucide-react'
+import { Eye, EyeOff, ShieldCheck, Sparkles, Truck, UserPlus } from 'lucide-react'
 import { useAuth } from '../context/auth-context'
 
 export function SignupPage() {
@@ -56,6 +56,24 @@ export function SignupPage() {
             <p className="mt-4 max-w-lg text-base leading-7 text-slate-600">
               Create role-ready accounts for dispatchers and operations managers with a simple onboarding flow and protected workspace access.
             </p>
+
+            <div className="mt-8 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-2xl border border-white/80 bg-white/80 px-4 py-4 shadow-sm shadow-slate-900/5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Role ready</p>
+                <p className="mt-2 text-lg font-bold text-slate-900">Dispatch</p>
+                <p className="mt-1 text-sm text-slate-500">Set up accounts for planners and route coordinators.</p>
+              </div>
+              <div className="rounded-2xl border border-white/80 bg-white/80 px-4 py-4 shadow-sm shadow-slate-900/5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Fast access</p>
+                <p className="mt-2 text-lg font-bold text-slate-900">Instant</p>
+                <p className="mt-1 text-sm text-slate-500">Successful registration signs the operator in immediately.</p>
+              </div>
+              <div className="rounded-2xl border border-white/80 bg-white/80 px-4 py-4 shadow-sm shadow-slate-900/5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Security</p>
+                <p className="mt-2 text-lg font-bold text-slate-900">Guarded</p>
+                <p className="mt-1 text-sm text-slate-500">Password strength and protected session flow by default.</p>
+              </div>
+            </div>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-white px-5 py-5">
@@ -83,6 +101,10 @@ export function SignupPage() {
         </div>
 
         <div className="rounded-[2rem] border border-white/80 bg-white/90 p-8 shadow-xl shadow-slate-900/6 backdrop-blur">
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700 ring-1 ring-emerald-100">
+            <Sparkles size={12} />
+            Onboarding access
+          </div>
           <div className="mb-6 text-center">
             <h2 className="font-display text-xl font-bold text-slate-900">Create your account</h2>
             <p className="mt-1 text-sm text-slate-500">Join the fleet operations team</p>
@@ -224,6 +246,21 @@ export function SignupPage() {
 
             <div className="rounded-xl bg-slate-50 px-4 py-3 text-xs font-medium text-slate-500">
               New accounts are signed in immediately after successful registration.
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-center shadow-sm shadow-slate-900/5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Profile</p>
+                <p className="mt-1 text-sm font-semibold text-slate-900">Identity</p>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-center shadow-sm shadow-slate-900/5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Security</p>
+                <p className="mt-1 text-sm font-semibold text-slate-900">Password</p>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-center shadow-sm shadow-slate-900/5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Access</p>
+                <p className="mt-1 text-sm font-semibold text-slate-900">Workspace</p>
+              </div>
             </div>
           </form>
 

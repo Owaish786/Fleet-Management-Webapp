@@ -1,5 +1,5 @@
 import { type FormEvent, useEffect, useMemo, useState } from 'react'
-import { CarFront, Gauge, ShieldCheck, Truck, UserRound } from 'lucide-react'
+import { CarFront, Gauge, Search, ShieldCheck, SlidersHorizontal, Truck, UserRound } from 'lucide-react'
 
 import { fleetApi } from '../lib/api'
 import { formatNumber } from '../lib/formatters'
@@ -26,6 +26,8 @@ export function VehiclesPage() {
   const [drivers, setDrivers] = useState<Driver[]>([])
   const [form, setForm] = useState<VehicleInput>(initialVehicle)
   const [assignmentDrafts, setAssignmentDrafts] = useState<Record<string, string>>({})
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState<'ALL' | VehicleStatus>('ALL')
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [assignmentBusyId, setAssignmentBusyId] = useState<string | null>(null)
@@ -67,6 +69,27 @@ export function VehiclesPage() {
     () => drivers.filter((driver) => driver.assignedVehicles.length === 0),
     [drivers],
   )
+
+  const filteredVehicles = useMemo(() => {
+    const query = search.trim().toLowerCase()
+
+    return vehicles.filter((vehicle) => {
+      if (statusFilter !== 'ALL' && vehicle.status !== statusFilter) {
+        return false
+      }
+
+      if (!query) {
+        return true
+      }
+
+      return [
+        vehicle.plateNumber,
+        vehicle.make,
+        vehicle.model,
+        vehicle.assignedDriver?.name ?? '',
+      ].some((value) => value.toLowerCase().includes(query))
+    })
+  }, [search, statusFilter, vehicles])
 
   useEffect(() => {
     setAssignmentDrafts((current) => {
@@ -171,7 +194,7 @@ export function VehiclesPage() {
             <h3 className="font-display text-xl font-bold text-slate-900">Vehicles</h3>
           </div>
           <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-            {vehicles.length} records
+            {filteredVehicles.length} of {vehicles.length}
           </span>
         </div>
 
@@ -180,6 +203,31 @@ export function VehiclesPage() {
             {error}
           </div>
         )}
+
+        <div className="mt-5 grid gap-3 rounded-2xl border border-slate-200 bg-slate-50/85 p-3 md:grid-cols-[1fr_180px]">
+          <label className="relative block">
+            <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-700 outline-none transition-colors focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search plate, make, model, or driver"
+            />
+          </label>
+          <label className="relative block">
+            <SlidersHorizontal size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <select
+              className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-700 outline-none transition-colors focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value as 'ALL' | VehicleStatus)}
+            >
+              <option value="ALL">All statuses</option>
+              {vehicleStatuses.map((status) => (
+                <option key={status} value={status}>{status}</option>
+              ))}
+            </select>
+          </label>
+        </div>
 
         <div className="mt-5 overflow-x-auto">
           <table className="w-full border-collapse text-sm">
@@ -193,7 +241,7 @@ export function VehiclesPage() {
               </tr>
             </thead>
             <tbody>
-              {vehicles.map((vehicle) => {
+              {filteredVehicles.map((vehicle) => {
                 const selectedDriverId = assignmentDrafts[vehicle.id] ?? vehicle.assignedDriver?.id ?? ''
                 const selectedDriver = drivers.find((driver) => driver.id === selectedDriverId) ?? null
                 const selectedDriverAssignment = selectedDriver?.assignedVehicles[0] ?? null
@@ -265,9 +313,9 @@ export function VehiclesPage() {
                   </td>
                 </tr>
               )})}
-              {vehicles.length === 0 && (
+              {filteredVehicles.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-3 py-8 text-center text-sm text-slate-500">No vehicles registered yet.</td>
+                  <td colSpan={5} className="px-3 py-8 text-center text-sm text-slate-500">No vehicles match the current search or filter.</td>
                 </tr>
               )}
             </tbody>

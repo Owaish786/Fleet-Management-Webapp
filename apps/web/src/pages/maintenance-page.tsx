@@ -1,5 +1,5 @@
 import { type FormEvent, useEffect, useMemo, useState } from 'react'
-import { ClipboardList, ShieldCheck, TimerReset, Truck, Wrench } from 'lucide-react'
+import { ClipboardList, Search, ShieldCheck, SlidersHorizontal, TimerReset, Truck, Wrench } from 'lucide-react'
 
 import { fleetApi } from '../lib/api'
 import { formatCurrencyInr, formatDate } from '../lib/formatters'
@@ -26,6 +26,8 @@ export function MaintenancePage() {
   const [records, setRecords] = useState<MaintenanceRecord[]>([])
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
   const [form, setForm] = useState<MaintenanceInput>(initialMaintenance)
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState<'ALL' | MaintenanceStatus>('ALL')
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -56,6 +58,24 @@ export function MaintenancePage() {
     () => records.reduce((sum, record) => sum + (record.cost ?? 0), 0),
     [records],
   )
+
+  const filteredRecords = useMemo(() => {
+    const query = search.trim().toLowerCase()
+
+    return records.filter((record) => {
+      if (statusFilter !== 'ALL' && record.status !== statusFilter) {
+        return false
+      }
+
+      if (!query) {
+        return true
+      }
+
+      return [record.type, record.vehicle.plateNumber, record.notes ?? ''].some((value) =>
+        value.toLowerCase().includes(query),
+      )
+    })
+  }, [records, search, statusFilter])
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -133,7 +153,7 @@ export function MaintenancePage() {
             <p className="mb-0.5 text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Workshop queue</p>
             <h3 className="font-display text-xl font-bold text-slate-900">Maintenance records</h3>
           </div>
-          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{records.length} records</span>
+          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{filteredRecords.length} of {records.length}</span>
         </div>
 
         {error && (
@@ -141,6 +161,31 @@ export function MaintenancePage() {
             {error}
           </div>
         )}
+
+        <div className="mt-5 grid gap-3 rounded-2xl border border-slate-200 bg-slate-50/85 p-3 md:grid-cols-[1fr_180px]">
+          <label className="relative block">
+            <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-700 outline-none transition-colors focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search vehicle, task, or notes"
+            />
+          </label>
+          <label className="relative block">
+            <SlidersHorizontal size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <select
+              className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-700 outline-none transition-colors focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value as 'ALL' | MaintenanceStatus)}
+            >
+              <option value="ALL">All statuses</option>
+              {maintenanceStatuses.map((status) => (
+                <option key={status} value={status}>{status}</option>
+              ))}
+            </select>
+          </label>
+        </div>
 
         <div className="mt-5 overflow-x-auto">
           <table className="w-full border-collapse text-sm">
@@ -154,7 +199,7 @@ export function MaintenancePage() {
               </tr>
             </thead>
             <tbody>
-              {records.map((record) => (
+              {filteredRecords.map((record) => (
                 <tr key={record.id} className="border-b border-slate-100 transition-colors hover:bg-slate-50/80">
                   <td className="px-3 py-3 font-mono text-xs font-medium text-slate-800"><span className="rounded-full bg-slate-100 px-2.5 py-1">{record.vehicle.plateNumber}</span></td>
                   <td className="px-3 py-3 text-slate-600">{record.type}</td>
@@ -167,9 +212,9 @@ export function MaintenancePage() {
                   <td className="px-3 py-3 text-slate-600">{record.cost ? formatCurrencyInr(record.cost) : 'Pending'}</td>
                 </tr>
               ))}
-              {records.length === 0 && (
+              {filteredRecords.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-3 py-8 text-center text-sm text-slate-500">No maintenance records scheduled yet.</td>
+                  <td colSpan={5} className="px-3 py-8 text-center text-sm text-slate-500">No maintenance records match the current search or filter.</td>
                 </tr>
               )}
             </tbody>

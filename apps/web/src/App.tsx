@@ -3,7 +3,9 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 
 import './App.css'
 import { Layout } from './components/layout'
+import { LoadingScreen } from './components/loading-screen'
 import { ProtectedRoute } from './components/protected-route'
+import { LandingPage } from './pages/landing-page'
 
 const DashboardPage = lazy(() => import('./pages/dashboard-page').then((module) => ({ default: module.DashboardPage })))
 const DriversPage = lazy(() => import('./pages/drivers-page').then((module) => ({ default: module.DriversPage })))
@@ -16,20 +18,14 @@ const TripsPage = lazy(() => import('./pages/trips-page').then((module) => ({ de
 const VehiclesPage = lazy(() => import('./pages/vehicles-page').then((module) => ({ default: module.VehiclesPage })))
 
 function RouteFallback() {
-  return (
-    <div className="flex min-h-[40vh] items-center justify-center bg-slate-50">
-      <div className="flex items-center gap-3 rounded-full border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-600 shadow-sm">
-        <span className="h-4 w-4 animate-spin rounded-full border-2 border-brand-600/25 border-t-brand-600" />
-        Loading workspace...
-      </div>
-    </div>
-  )
+  return <LoadingScreen message="Loading the next route, dashboard, and fleet controls..." />
 }
 
 function App() {
   return (
     <Suspense fallback={<RouteFallback />}>
       <Routes>
+        <Route index element={<LandingPage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="signup" element={<SignupPage />} />
         <Route path="forgot-password" element={<ForgotPasswordPage />} />
@@ -47,8 +43,7 @@ function App() {
           <Route path="trips" element={<TripsPage />} />
           <Route path="maintenance" element={<MaintenancePage />} />
         </Route>
-        <Route index element={<Navigate to="/login" replace />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Suspense>
   )
