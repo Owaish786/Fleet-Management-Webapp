@@ -12,6 +12,8 @@
     "db:seed": "prisma db seed --schema ../../prisma/schema.prisma"
   },
   "dependencies": {
+    "@aws-sdk/client-lambda": "^3.1010.0",
+    "@aws-sdk/client-s3": "^3.922.0",
     "@prisma/client": "^6.7.0",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",

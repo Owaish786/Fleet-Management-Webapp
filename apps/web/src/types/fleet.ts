@@ -164,3 +164,61 @@ export interface MaintenanceInput {
   notes?: string | null
   vehicleId: string
 }
+
+export interface FleetAnalyticsInsights {
+  generatedAt: string
+  fuelTrend: {
+    history: Array<{
+      month: string
+      totalFuelLiters: number
+      totalDistanceKm: number
+      avgFuelPer100Km: number
+      tripCount: number
+    }>
+    predictedNextMonthAvgFuelPer100Km: number | null
+  }
+  abnormalDriverBehavior: {
+    thresholdKph: number
+    drivers: Array<{
+      driverId: string
+      driverName: string
+      totalPings: number
+      overspeedEvents: number
+      abruptHeadingEvents: number
+      anomalyScore: number
+    }>
+  }
+  routeOptimization: {
+    candidates: Array<{
+      routeKey: string
+      origin: string
+      destination: string
+      sampleTrips: number
+      avgDistanceKm: number
+      avgDurationMinutes: number | null
+      avgFuelPer100Km: number | null
+    }>
+    bestByFuelEfficiency: {
+      routeKey: string
+      origin: string
+      destination: string
+      sampleTrips: number
+      avgDistanceKm: number
+      avgDurationMinutes: number | null
+      avgFuelPer100Km: number | null
+    } | null
+  }
+  maintenancePrediction: {
+    vehicles: Array<{
+      vehicleId: string
+      plateNumber: string
+      mileage: number
+      daysSinceLastCompletedMaintenance: number | null
+      openMaintenanceRecords: number
+      riskScore: number
+      riskLevel: 'LOW' | 'MEDIUM' | 'HIGH'
+      recommendedServiceInDays: number
+    }>
+    highRiskCount: number
+  }
+}

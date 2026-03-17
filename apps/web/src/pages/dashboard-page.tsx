@@ -13,11 +13,12 @@ import {
   YAxis,
 } from 'recharts'
 
+import { AnalyticsInsightsPanel } from '../components/analytics-insights-panel'
 import { StatCard } from '../components/stat-card'
 import { fleetApi } from '../lib/api'
 import { formatDateTime } from '../lib/formatters'
 import { statusBadgeClass } from '../lib/status-styles'
-import type { DashboardSummary } from '../types/fleet'
+import type { DashboardSummary, FleetAnalyticsInsights } from '../types/fleet'
 
 const PIE_COLORS = ['#10b981', '#f59e0b', '#94a3b8']
 
@@ -86,6 +87,68 @@ const fallbackSummary: DashboardSummary = {
   ],
 }
 
+const fallbackInsights: FleetAnalyticsInsights = {
+  generatedAt: new Date().toISOString(),
+  fuelTrend: {
+    history: [
+      { month: '2026-01', totalFuelLiters: 842, totalDistanceKm: 6110, avgFuelPer100Km: 13.78, tripCount: 28 },
+      { month: '2026-02', totalFuelLiters: 804, totalDistanceKm: 5980, avgFuelPer100Km: 13.44, tripCount: 26 },
+      { month: '2026-03', totalFuelLiters: 871, totalDistanceKm: 6280, avgFuelPer100Km: 13.87, tripCount: 29 },
+    ],
+    predictedNextMonthAvgFuelPer100Km: 14.02,
+  },
+  abnormalDriverBehavior: {
+    thresholdKph: 95,
+    drivers: [
+      {
+        driverId: 'preview-driver-1',
+        driverName: 'Raj Malhotra',
+        totalPings: 42,
+        overspeedEvents: 3,
+        abruptHeadingEvents: 4,
+        anomalyScore: 0.12,
+      },
+    ],
+  },
+  routeOptimization: {
+    candidates: [
+      {
+        routeKey: 'Mumbai -> Pune',
+        origin: 'Mumbai',
+        destination: 'Pune',
+        sampleTrips: 7,
+        avgDistanceKm: 149,
+        avgDurationMinutes: 214,
+        avgFuelPer100Km: 12.6,
+      },
+    ],
+    bestByFuelEfficiency: {
+      routeKey: 'Mumbai -> Pune',
+      origin: 'Mumbai',
+      destination: 'Pune',
+      sampleTrips: 7,
+      avgDistanceKm: 149,
+      avgDurationMinutes: 214,
+      avgFuelPer100Km: 12.6,
+    },
+  },
+  maintenancePrediction: {
+    vehicles: [
+      {
+        vehicleId: 'preview-vehicle-1',
+        plateNumber: 'DL01AB2451',
+        mileage: 167800,
+        daysSinceLastCompletedMaintenance: 121,
+        openMaintenanceRecords: 1,
+        riskScore: 63,
+        riskLevel: 'MEDIUM',
+        recommendedServiceInDays: 19,
+      },
+    ],
+    highRiskCount: 1,
+  },
+}
+
 const tooltipStyle = {
   contentStyle: {
     background: '#ffffff',
@@ -113,37 +176,57 @@ type RouteRange = (typeof routeRanges)[number]['key']
 
 export function DashboardPage() {
   const [summary, setSummary] = useState<DashboardSummary | null>(null)
+  const [insights, setInsights] = useState<FleetAnalyticsInsights | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [analyticsError, setAnalyticsError] = useState<string | null>(null)
   const [routeRange, setRouteRange] = useState<RouteRange>('7D')
+  const [mountedAtMs] = useState(() => Date.now())
 
   useEffect(() => {
-    async function loadSummary() {
-      try {
-        setError(null)
-        setSummary(await fleetApi.getDashboard())
-      } catch (loadError) {
-        setError(loadError instanceof Error ? loadError.message : 'Unable to load dashboard.')
+    async function loadData() {
+      setError(null)
+      setAnalyticsError(null)
+
+      const [summaryResult, insightsResult] = await Promise.allSettled([
+        fleetApi.getDashboard(),
+        fleetApi.getAnalyticsInsights(),
+      ])
+
+      if (summaryResult.status === 'fulfilled') {
+        setSummary(summaryResult.value)
+      } else {
+        setError(summaryResult.reason instanceof Error ? summaryResult.reason.message : 'Unable to load dashboard.')
+      }
+
+      if (insightsResult.status === 'fulfilled') {
+        setInsights(insightsResult.value)
+      } else {
+        setAnalyticsError(
+          insightsResult.reason instanceof Error
+            ? insightsResult.reason.message
+            : 'Unable to load predictive analytics.',
+        )
       }
     }
 
-    void loadSummary()
+    void loadData()
   }, [])
 
   const displaySummary = summary ?? fallbackSummary
+  const displayInsights = insights ?? fallbackInsights
   const filteredTrips = useMemo(() => {
-    const now = Date.now()
     const rangeStart =
       routeRange === '24H'
-        ? now - 1000 * 60 * 60 * 24
+        ? mountedAtMs - 1000 * 60 * 60 * 24
         : routeRange === '7D'
-          ? now - 1000 * 60 * 60 * 24 * 7
+          ? mountedAtMs - 1000 * 60 * 60 * 24 * 7
           : null
 
     return displaySummary.recentTrips.filter((trip) => {
       if (rangeStart === null) return true
       return new Date(trip.departureAt).getTime() >= rangeStart
     })
-  }, [displaySummary.recentTrips, routeRange])
+  }, [displaySummary.recentTrips, mountedAtMs, routeRange])
 
   const analyticsTrips = filteredTrips.length > 0 ? filteredTrips : displaySummary.recentTrips
   const totalVehicles = displaySummary.vehicleStatus.reduce((total, item) => total + item.value, 0)
@@ -174,6 +257,12 @@ export function DashboardPage() {
       {!summary && !error && (
         <div className="col-span-full rounded-lg border border-brand-200 bg-brand-50 px-4 py-3 text-sm font-medium text-brand-700">
           Syncing live fleet metrics...
+        </div>
+      )}
+
+      {analyticsError && (
+        <div className="col-span-full rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm font-medium text-indigo-700">
+          Predictive analytics is using preview data ({analyticsError}).
         </div>
       )}
 
@@ -543,6 +632,8 @@ export function DashboardPage() {
           </table>
         </div>
       </section>
+
+      <AnalyticsInsightsPanel insights={displayInsights} />
     </div>
   )
 }

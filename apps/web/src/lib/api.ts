@@ -2,6 +2,7 @@ import type {
   DashboardSummary,
   Driver,
   DriverInput,
+  FleetAnalyticsInsights,
   LiveTrackingPoint,
   MaintenanceInput,
   MaintenanceRecord,
@@ -42,6 +43,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export const fleetApi = {
   getDashboard: () => request<DashboardSummary>('/dashboard'),
+  getAnalyticsInsights: () => request<FleetAnalyticsInsights>('/analytics/insights'),
   getLatestTracking: () => request<LiveTrackingPoint[]>('/tracking/latest'),
   getVehicles: () => request<Vehicle[]>('/vehicles'),
   createVehicle: (payload: VehicleInput) =>
