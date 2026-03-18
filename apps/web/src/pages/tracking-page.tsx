@@ -8,6 +8,7 @@ import { fleetApi } from '../lib/api'
 import { formatTime } from '../lib/formatters'
 import { statusBadgeClass } from '../lib/status-styles'
 import type { LiveTrackingPoint } from '../types/fleet'
+import { RoutePlannerPanel } from '../components/route-optimizer'
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:4000/api'
 const SOCKET_URL = API_URL.replace(/\/api$/, '')
@@ -93,7 +94,9 @@ export function TrackingPage() {
   }, [movementFilter, points, search])
 
   return (
-    <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.35fr_0.65fr]">
+    <div className="space-y-6">
+      <RoutePlannerPanel />
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.35fr_0.65fr]">
       <section className="animate-fade-up overflow-hidden rounded-[1.85rem] border border-slate-200 bg-white shadow-sm">
         <div className="grid gap-0 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="relative p-6 sm:p-8">
@@ -284,6 +287,7 @@ export function TrackingPage() {
           )}
         </div>
       </section>
+    </div>
     </div>
   )
 }

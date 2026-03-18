@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import { z } from 'zod'
 
-import { requireAuth } from '../middleware/auth.js'
+import { requireAuth, type AuthRequest } from '../middleware/auth.js'
 import { createTrackingPing, getLatestTracking } from '../services/tracking-service.js'
 
 export const trackingRouter = Router()
@@ -21,9 +21,10 @@ const trackingPingSchema = z.object({
 
 trackingRouter.use(requireAuth)
 
-trackingRouter.get('/latest', async (_request, response, next) => {
+trackingRouter.get('/latest', async (request, response, next) => {
   try {
-    response.json(await getLatestTracking())
+    const userId = (request as AuthRequest).user!.id
+    response.json(await getLatestTracking(userId))
   } catch (error) {
     next(error)
   }
@@ -31,11 +32,15 @@ trackingRouter.get('/latest', async (_request, response, next) => {
 
 trackingRouter.post('/ping', async (request, response, next) => {
   try {
+    const userId = (request as AuthRequest).user!.id
     const payload = trackingPingSchema.parse(request.body)
-    const result = await createTrackingPing({
-      ...payload,
-      recordedAt: payload.recordedAt ? new Date(payload.recordedAt) : undefined,
-    })
+    const result = await createTrackingPing(
+      {
+        ...payload,
+        recordedAt: payload.recordedAt ? new Date(payload.recordedAt) : undefined,
+      },
+      userId
+    )
     response.status(201).json(result)
   } catch (error) {
     next(error)

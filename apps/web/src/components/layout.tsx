@@ -39,6 +39,7 @@ export function Layout() {
   const currentDescription = pageDescriptions[location.pathname] ?? 'Fleet management operations'
   const [mobileOpen, setMobileOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
+  const [timeLabel, setTimeLabel] = useState(formatTime(new Date()))
   const profileRef = useRef<HTMLDivElement | null>(null)
 
   const displayName = user?.name?.trim() || 'User'
@@ -47,7 +48,6 @@ export function Layout() {
     ? formatDate(user.createdAt)
     : null
   const todayLabel = formatDate(new Date())
-  const timeLabel = formatTime(new Date())
 
   const initials = displayName
     .split(' ')
@@ -61,6 +61,15 @@ export function Layout() {
     logout()
     navigate('/login')
   }
+
+  useEffect(() => {
+    // Update local time every second
+    const timer = setInterval(() => {
+      setTimeLabel(formatTime(new Date()))
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [])
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {

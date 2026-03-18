@@ -63,20 +63,30 @@ const ABRUPT_HEADING_DELTA_DEG = 70
 const MAX_HEADING_EVENT_WINDOW_SECONDS = 300
 const DAY_MS = 1000 * 60 * 60 * 24
 
-export async function getFleetAnalyticsInsights(): Promise<FleetAnalyticsInsights> {
+export async function getFleetAnalyticsInsights(userId?: string): Promise<FleetAnalyticsInsights> {
   const [trips, pings, drivers, vehicles] = await Promise.all([
     prisma.trip.findMany({
+      where: userId ? { ownerId: userId } : undefined,
       orderBy: { departureAt: 'asc' },
       include: {
         driver: { select: { id: true, name: true } },
       },
     }),
     prisma.vehicleLocationPing.findMany({
-      where: {
-        driverId: {
-          not: null,
-        },
-      },
+      where: userId
+        ? {
+            driverId: {
+              not: null,
+            },
+            trip: {
+              ownerId: userId,
+            },
+          }
+        : {
+            driverId: {
+              not: null,
+            },
+          },
       orderBy: [{ driverId: 'asc' }, { recordedAt: 'asc' }],
       select: {
         driverId: true,
@@ -86,12 +96,14 @@ export async function getFleetAnalyticsInsights(): Promise<FleetAnalyticsInsight
       },
     }),
     prisma.driver.findMany({
+      where: userId ? { ownerId: userId } : undefined,
       select: {
         id: true,
         name: true,
       },
     }),
     prisma.vehicle.findMany({
+      where: userId ? { ownerId: userId } : undefined,
       select: {
         id: true,
         plateNumber: true,

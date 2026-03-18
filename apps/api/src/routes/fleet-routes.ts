@@ -3,7 +3,7 @@ import { z } from 'zod'
 
 import { createHttpError } from '../lib/http-error.js'
 import { prisma } from '../lib/prisma.js'
-import { requireAuth } from '../middleware/auth.js'
+import { requireAuth, type AuthRequest } from '../middleware/auth.js'
 import {
   listDrivers,
   listMaintenanceRecords,
@@ -108,9 +108,10 @@ export const fleetRouter = Router()
 
 fleetRouter.use(requireAuth)
 
-fleetRouter.get('/vehicles', async (_request, response, next) => {
+fleetRouter.get('/vehicles', async (request, response, next) => {
   try {
-    response.json(await listVehicles())
+    const userId = (request as AuthRequest).user!.id
+    response.json(await listVehicles(userId))
   } catch (error) {
     next(error)
   }
@@ -118,8 +119,9 @@ fleetRouter.get('/vehicles', async (_request, response, next) => {
 
 fleetRouter.post('/vehicles', async (request, response, next) => {
   try {
+    const userId = (request as AuthRequest).user!.id
     const payload = vehicleSchema.parse(request.body)
-    const vehicle = await createVehicleRecord(payload)
+    const vehicle = await createVehicleRecord(payload, userId)
     response.status(201).json(vehicle)
   } catch (error) {
     next(error)
@@ -136,9 +138,10 @@ fleetRouter.patch('/vehicles/:vehicleId/assignment', async (request, response, n
   }
 })
 
-fleetRouter.get('/drivers', async (_request, response, next) => {
+fleetRouter.get('/drivers', async (request, response, next) => {
   try {
-    response.json(await listDrivers())
+    const userId = (request as AuthRequest).user!.id
+    response.json(await listDrivers(userId))
   } catch (error) {
     next(error)
   }
@@ -146,9 +149,10 @@ fleetRouter.get('/drivers', async (_request, response, next) => {
 
 fleetRouter.post('/drivers', async (request, response, next) => {
   try {
+    const userId = (request as AuthRequest).user!.id
     const payload = driverSchema.parse(request.body)
     const driver = await prisma.driver.create({
-      data: payload,
+      data: { ...payload, ownerId: userId },
       include: {
         assignedVehicles: {
           select: {
@@ -164,9 +168,10 @@ fleetRouter.post('/drivers', async (request, response, next) => {
   }
 })
 
-fleetRouter.get('/trips', async (_request, response, next) => {
+fleetRouter.get('/trips', async (request, response, next) => {
   try {
-    response.json(await listTrips())
+    const userId = (request as AuthRequest).user!.id
+    response.json(await listTrips(userId))
   } catch (error) {
     next(error)
   }
@@ -174,8 +179,9 @@ fleetRouter.get('/trips', async (_request, response, next) => {
 
 fleetRouter.post('/trips', async (request, response, next) => {
   try {
+    const userId = (request as AuthRequest).user!.id
     const payload = tripSchema.parse(request.body)
-    const trip = await createTripRecord(payload)
+    const trip = await createTripRecord(payload, userId)
     response.status(201).json(trip)
   } catch (error) {
     next(error)
@@ -192,9 +198,10 @@ fleetRouter.patch('/trips/:tripId/complete', async (request, response, next) => 
   }
 })
 
-fleetRouter.get('/maintenance', async (_request, response, next) => {
+fleetRouter.get('/maintenance', async (request, response, next) => {
   try {
-    response.json(await listMaintenanceRecords())
+    const userId = (request as AuthRequest).user!.id
+    response.json(await listMaintenanceRecords(userId))
   } catch (error) {
     next(error)
   }
@@ -202,10 +209,12 @@ fleetRouter.get('/maintenance', async (_request, response, next) => {
 
 fleetRouter.post('/maintenance', async (request, response, next) => {
   try {
+    const userId = (request as AuthRequest).user!.id
     const payload = maintenanceSchema.parse(request.body)
     const record = await prisma.maintenanceRecord.create({
       data: {
         ...payload,
+        ownerId: userId,
         scheduledFor: new Date(payload.scheduledFor),
         completedAt: payload.completedAt ? new Date(payload.completedAt) : null,
       },
@@ -227,7 +236,7 @@ fleetRouter.post('/maintenance', async (request, response, next) => {
   }
 })
 
-async function createVehicleRecord(payload: z.infer<typeof vehicleSchema>) {
+async function createVehicleRecord(payload: z.infer<typeof vehicleSchema>, userId: string) {
   return prisma.$transaction(async (tx) => {
     if (payload.assignedDriverId) {
       const [driver, existingAssignment] = await Promise.all([
@@ -251,7 +260,7 @@ async function createVehicleRecord(payload: z.infer<typeof vehicleSchema>) {
     }
 
     return tx.vehicle.create({
-      data: payload,
+      data: { ...payload, ownerId: userId },
       include: {
         assignedDriver: {
           select: {
@@ -264,7 +273,7 @@ async function createVehicleRecord(payload: z.infer<typeof vehicleSchema>) {
   })
 }
 
-async function createTripRecord(payload: z.infer<typeof tripSchema>) {
+async function createTripRecord(payload: z.infer<typeof tripSchema>, userId: string) {
   return prisma.$transaction(async (tx) => {
     const [vehicle, driver, driverAssignedVehicle, activeVehicleTrip, activeDriverTrip] = await Promise.all([
       tx.vehicle.findUnique({
@@ -365,6 +374,7 @@ async function createTripRecord(payload: z.infer<typeof tripSchema>) {
     return tx.trip.create({
       data: {
         ...payload,
+        ownerId: userId,
         departureAt: new Date(payload.departureAt),
         arrivalAt: payload.arrivalAt ? new Date(payload.arrivalAt) : null,
       },

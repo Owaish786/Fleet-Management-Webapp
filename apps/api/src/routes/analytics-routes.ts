@@ -2,11 +2,12 @@ import { Router } from 'express'
 import { z } from 'zod'
 
 import { env } from '../config/env.js'
-import { requireAuth } from '../middleware/auth.js'
+import { requireAuth, type AuthRequest } from '../middleware/auth.js'
 import { getAnalyticsInsightsFromLambda } from '../services/aws-analytics-lambda-service.js'
 import { uploadAnalyticsSnapshotToS3 } from '../services/analytics-export-service.js'
 import { getFleetAnalyticsInsights } from '../services/analytics-service.js'
 import { uploadAccessLogsToS3 } from '../services/log-export-service.js'
+import { getSchedulerStatus } from '../services/export-scheduler-service.js'
 
 export const analyticsRouter = Router()
 
@@ -20,11 +21,12 @@ const logsExportSchema = z.object({
 
 analyticsRouter.use(requireAuth)
 
-analyticsRouter.get('/insights', async (_request, response, next) => {
+analyticsRouter.get('/insights', async (request, response, next) => {
   try {
+    const userId = (request as AuthRequest).user!.id
     const insights = env.AWS_LAMBDA_ANALYTICS_FUNCTION
       ? await getAnalyticsInsightsFromLambda()
-      : await getFleetAnalyticsInsights()
+      : await getFleetAnalyticsInsights(userId)
     response.json(insights)
   } catch (error) {
     next(error)
@@ -33,8 +35,9 @@ analyticsRouter.get('/insights', async (_request, response, next) => {
 
 analyticsRouter.post('/insights/export-s3', async (request, response, next) => {
   try {
+    const userId = (request as AuthRequest).user!.id
     const payload = exportSchema.parse(request.body)
-    const insights = await getFleetAnalyticsInsights()
+    const insights = await getFleetAnalyticsInsights(userId)
     const result = await uploadAnalyticsSnapshotToS3(insights, payload.keyPrefix)
 
     response.status(201).json({
@@ -58,4 +61,12 @@ analyticsRouter.post('/logs/export-s3', async (request, response, next) => {
   } catch (error) {
     next(error)
   }
+})
+
+analyticsRouter.get('/export-scheduler/status', async (_request, response) => {
+  const status = getSchedulerStatus()
+  response.json({
+    message: 'Periodic export scheduler status',
+    scheduler: status,
+  })
 })

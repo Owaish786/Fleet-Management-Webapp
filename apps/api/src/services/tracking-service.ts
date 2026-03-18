@@ -15,18 +15,23 @@ export interface CreateTrackingPingInput {
   recordedAt?: Date
 }
 
-export async function createTrackingPing(input: CreateTrackingPingInput) {
+export async function createTrackingPing(input: CreateTrackingPingInput, userId?: string) {
   const vehicle = await prisma.vehicle.findUnique({
     where: { id: input.vehicleId },
     select: {
       id: true,
       plateNumber: true,
       assignedDriverId: true,
+      ownerId: true,
     },
   })
 
   if (!vehicle) {
     throw createHttpError(404, 'Tracked vehicle was not found.')
+  }
+
+  if (userId && vehicle.ownerId !== userId) {
+    throw createHttpError(403, 'You do not have permission to track this vehicle.')
   }
 
   const trip = input.tripId
@@ -110,8 +115,9 @@ export async function createTrackingPing(input: CreateTrackingPingInput) {
   return payload
 }
 
-export async function getLatestTracking() {
+export async function getLatestTracking(userId?: string) {
   const pings = await prisma.vehicleLocationPing.findMany({
+    where: userId ? { vehicle: { ownerId: userId } } : undefined,
     orderBy: {
       recordedAt: 'desc',
     },

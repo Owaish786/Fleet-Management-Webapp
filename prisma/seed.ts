@@ -48,7 +48,7 @@ async function main() {
 
   // 1. Create Admin
   const hashedPassword = await bcrypt.hash(DEMO_PASSWORD, SALT_ROUNDS)
-  await prisma.user.create({
+  const admin = await prisma.user.create({
     data: {
       name: 'Fleet Admin',
       email: DEMO_EMAIL,
@@ -67,6 +67,7 @@ async function main() {
         phone: `+91 ${randomInt(70000, 99999)} ${randomInt(10000, 99999)}`,
         status: randomElement(Object.values(DriverStatus)),
         joinedAt: randomDate(new Date(Date.now() - 365 * ONE_DAY), new Date()),
+        ownerId: admin.id,
       },
     })
     drivers.push(driver)
@@ -85,6 +86,7 @@ async function main() {
         year: randomInt(2018, 2025),
         mileage: randomInt(10000, 150000),
         status: randomElement(Object.values(VehicleStatus)),
+        ownerId: admin.id,
       },
     })
     vehicles.push(vehicle)
@@ -98,6 +100,7 @@ async function main() {
           status: randomElement(Object.values(MaintenanceStatus)),
           scheduledFor: randomDate(new Date(), new Date(Date.now() + 30 * ONE_DAY)),
           cost: randomInt(2000, 15000),
+          ownerId: admin.id,
         },
       })
     }
@@ -137,6 +140,7 @@ async function main() {
         arrivalAt: arrival,
         distanceKm,
         fuelUsedLiters: fuelUsed ? parseFloat(fuelUsed.toFixed(1)) : null,
+        ownerId: admin.id,
       }
     })
     tripCount++

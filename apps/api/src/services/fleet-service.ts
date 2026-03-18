@@ -1,7 +1,8 @@
 import { prisma } from '../lib/prisma.js'
 
-export async function listVehicles() {
+export async function listVehicles(userId?: string) {
   return prisma.vehicle.findMany({
+    where: userId ? { ownerId: userId } : undefined,
     orderBy: {
       createdAt: 'desc',
     },
@@ -16,8 +17,9 @@ export async function listVehicles() {
   })
 }
 
-export async function listDrivers() {
+export async function listDrivers(userId?: string) {
   return prisma.driver.findMany({
+    where: userId ? { ownerId: userId } : undefined,
     orderBy: {
       createdAt: 'desc',
     },
@@ -32,8 +34,9 @@ export async function listDrivers() {
   })
 }
 
-export async function listTrips() {
+export async function listTrips(userId?: string) {
   return prisma.trip.findMany({
+    where: userId ? { ownerId: userId } : undefined,
     orderBy: {
       departureAt: 'desc',
     },
@@ -54,8 +57,9 @@ export async function listTrips() {
   })
 }
 
-export async function listMaintenanceRecords() {
+export async function listMaintenanceRecords(userId?: string) {
   const records = await prisma.maintenanceRecord.findMany({
+    where: userId ? { ownerId: userId } : undefined,
     orderBy: {
       scheduledFor: 'asc',
     },

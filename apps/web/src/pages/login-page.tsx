@@ -1,6 +1,6 @@
 import { type FormEvent, useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
-import { ArrowRight, Eye, EyeOff, LogIn, ShieldCheck, Sparkles, Truck } from 'lucide-react'
+import { Eye, EyeOff, LogIn, ShieldCheck, Sparkles, Truck } from 'lucide-react'
 import { useAuth } from '../context/auth-context'
 
 export function LoginPage() {
@@ -30,11 +30,6 @@ export function LoginPage() {
 
   const inputCls =
     'w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm text-slate-800 outline-none placeholder-slate-400 transition-colors focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20'
-
-  function fillDemoAccount() {
-    setEmail('admin@haulsync.in')
-    setPassword('password123')
-  }
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-50 px-4 py-10">
@@ -106,24 +101,6 @@ export function LoginPage() {
           <div className="mb-6 text-center">
             <h2 className="font-display text-xl font-bold text-slate-900">Welcome back</h2>
             <p className="mt-1 text-sm text-slate-500">Sign in to your operations console and resume fleet oversight.</p>
-          </div>
-
-          <div className="mb-5 rounded-2xl border border-brand-100 bg-gradient-to-br from-brand-50 to-cyan-50 px-4 py-4 text-sm text-brand-950">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="font-semibold">Demo credentials</p>
-                <p className="mt-1 text-brand-900/80">Email: admin@haulsync.in</p>
-                <p className="text-brand-900/80">Password: password123</p>
-              </div>
-              <button
-                type="button"
-                onClick={fillDemoAccount}
-                className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-brand-700 shadow-sm ring-1 ring-brand-100 transition-colors hover:bg-brand-50"
-              >
-                Use demo
-                <ArrowRight size={14} />
-              </button>
-            </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">

@@ -1,6 +1,8 @@
 import { prisma } from '../lib/prisma.js'
 
-export async function getDashboardSummary() {
+export async function getDashboardSummary(userId?: string) {
+  const whereFilter = userId ? { ownerId: userId } : undefined
+
   const [
     vehicleCount,
     activeVehicleCount,
@@ -10,12 +12,13 @@ export async function getDashboardSummary() {
     vehicleStatusGroups,
     recentTrips,
   ] = await Promise.all([
-    prisma.vehicle.count(),
-    prisma.vehicle.count({ where: { status: 'ACTIVE' } }),
-    prisma.driver.count(),
-    prisma.trip.count({ where: { status: 'IN_PROGRESS' } }),
+    prisma.vehicle.count({ where: whereFilter }),
+    prisma.vehicle.count({ where: { ...whereFilter, status: 'ACTIVE' } }),
+    prisma.driver.count({ where: whereFilter }),
+    prisma.trip.count({ where: { ...whereFilter, status: 'IN_PROGRESS' } }),
     prisma.maintenanceRecord.count({
       where: {
+        ...whereFilter,
         status: {
           in: ['SCHEDULED', 'IN_PROGRESS'],
         },
@@ -23,11 +26,13 @@ export async function getDashboardSummary() {
     }),
     prisma.vehicle.groupBy({
       by: ['status'],
+      where: whereFilter,
       _count: {
         status: true,
       },
     }),
     prisma.trip.findMany({
+      where: whereFilter,
       take: 6,
       orderBy: {
         departureAt: 'desc',
